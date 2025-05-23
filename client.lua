@@ -3,17 +3,17 @@
 -- https://choosealicense.com/licenses/gpl-3.0/
 --  Copyright © 2025 Scorpion <https://github.com/scorpion7162> 
 
-local entityCreators = {}
+local EntMaker = {}
 local resourceName = lib.cache.resource
 
 CreateVehicle = (function(original)
     return function(modelHash, x, y, z, heading, isNetworked, bScriptHostVeh)
         local entity = original(modelHash, x, y, z, heading, isNetworked, bScriptHostVeh)
-        if entity ~= 0 then
-            entityCreators[entity] = resourceName
+        if entity ~= 0 then -- Check if the ent is valid
+            EntMaker[entity] = resourceName
             local modelName = GetDisplayNameFromVehicleModel(modelHash)
-            local netId = NetworkGetNetworkIdFromEntity(entity)
-            lib.print.info(resourceName, "spawned vehicle", modelName, "NetID:", netId)
+            local netId = NetworkGetNetworkIdFromEntity(entity) 
+            lib.print.info(resourceName, "spawned vehicle", modelName, "NetID:", netId) -- lib print so it goes [INFO] in console 
         end
         return entity
     end
@@ -22,11 +22,11 @@ end)(CreateVehicle)
 DeleteEntity = (function(original)
     return function(entity)
         if entity ~= 0 then
-            local creator = entityCreators[entity]
+            local creator = EntMaker[entity]
             if creator then
                 local modelName = GetDisplayNameFromVehicleModel(GetEntityModel(entity))
                 lib.print.warn(resourceName, "deleted vehicle", modelName, "originally spawned by:", creator)
-                entityCreators[entity] = nil
+                EntMaker[entity] = nil
             end
         end
         return original(entity)
@@ -36,10 +36,14 @@ end)(DeleteEntity)
 CreateThread(function()
     while true do
         Wait(5000)
-        for entity, creator in pairs(entityCreators) do
+        for entity, creator in pairs(EntMaker) do
             if not DoesEntityExist(entity) then
-                lib.print.error("Vehicle orphaned - spawned by:", creator, "Entity:", entity)
-                entityCreators[entity] = nil
+                lib.print.error("Unknown entity removal - spawned by:", creator, "Entity:", entity)
+                --[[ If it's unknown then it was deleted by:
+                    Native SetEntityAsNoLongerNeeded + engine cleanup, Server-side deletion, A different client script force-deleting/despawning it,
+                    Native CFX vehicle cleanup (e.g., streaming limits or leaving area)
+                    or Resource stop without proper cleanup. Stop scripts until it stops to help debuging :) ]]
+                EntMaker[entity] = nil
             end
         end
     end
