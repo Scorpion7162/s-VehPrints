@@ -1,3 +1,8 @@
+-- This resource is protected under the GNU General Public License v3.0.
+-- You may not redistribute this code without providing clear attribution to the original author (Scorpion).
+-- https://choosealicense.com/licenses/gpl-3.0/
+--  Copyright © 2025 Scorpion <https://github.com/scorpion7162> 
+
 local entityCreators = {}
 local resourceName = lib.cache.resource
 
@@ -39,3 +44,11 @@ CreateThread(function()
         end
     end
 end)
+
+-- This resource is protected under the GNU General Public License v3.0.
+-- You may not redistribute this code without providing clear attribution to the original author (Scorpion).
+-- https://choosealicense.com/licenses/gpl-3.0/
+--  Copyright © 2025 Scorpion <https://github.com/scorpion7162> 
+
+
+-- Thank you ox team for ox_lib <3 
